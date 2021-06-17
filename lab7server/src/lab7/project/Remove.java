@@ -29,12 +29,12 @@ public class Remove {
 	}
 
 	public String clear(int userID) {
-		System.out.println("useIDincweocn: "+userID);
+		System.out.println("useIDincweocn: " + userID);
 		ArrayList<Integer> keyToRem = new ArrayList<Integer>();
 		for (Entry<Integer, Person> m : showPersons2.entrySet()) {
 			Person a = m.getValue();
-			if (userID==a.getUserID()) {
-				System.out.println("here: "+a.getName()+" id: "+a.getID());
+			if (userID == a.getUserID()) {
+				System.out.println("here: " + a.getName() + " id: " + a.getID());
 				keyToRem.add(m.getKey());
 			}
 		}
@@ -44,11 +44,11 @@ public class Remove {
 		return "Your elements are deleted!";
 	}
 
-	public void remove_greater(long key,int userID) {
+	public void remove_greater(long key, int userID) {
 		ArrayList<Integer> keyToRem = new ArrayList<Integer>();
 		for (Entry<Integer, Person> m : showPersons2.entrySet()) {
 			Person a = m.getValue();
-			if (key <= m.getKey()&&userID==a.getUserID()) {
+			if (key <= m.getKey() && userID == a.getUserID()) {
 				keyToRem.add(m.getKey());
 			}
 		}
@@ -57,12 +57,12 @@ public class Remove {
 		}
 	}
 
-	public String remove_all_by_birthday(String birthsday,int userID) {
+	public String remove_all_by_birthday(String birthsday, int userID) {
 		int res = -1;
 		String retMes = "Nobody has birthsday at that date or you don't have acces to this element";
 		for (Entry<Integer, Person> m : showPersons2.entrySet()) {
 			Person a = m.getValue();
-			if (a.FgetBirthday().toString().equals(birthsday)&&userID==a.getUserID()) {
+			if (a.FgetBirthday().toString().equals(birthsday) && userID == a.getUserID()) {
 				res = m.getKey();
 				retMes = (a.getName() + " was removed");
 			}

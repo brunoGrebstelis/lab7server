@@ -1,4 +1,5 @@
 package lab7.project;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,8 +15,8 @@ import obj.Person;
 import obj.PrintOut;
 import obj.UserInfo;
 
-public class ServerAction implements Runnable{
-	
+public class ServerAction implements Runnable {
+
 	private DataBaseOp doc = new DataBaseOp();
 	private IDoperations check = new IDoperations(doc.getShowPersons2());
 	private Remove rem = new Remove(doc.getShowPersons2());
@@ -27,11 +28,11 @@ public class ServerAction implements Runnable{
 	private Objects msgRes, msg;
 	private String input;
 	private String send;
-	private int userID=-1;
+	private int userID = -1;
 	private String thislogin;
-	
-	public ServerAction(Socket socket){
-		this.socket=socket;		
+
+	public ServerAction(Socket socket) {
+		this.socket = socket;
 	}
 
 	@Override
@@ -44,7 +45,6 @@ public class ServerAction implements Runnable{
 				msgRes = (Objects) inStream.readObject();
 				this.input = msgRes.message;
 				doc = new DataBaseOp();
-				//doc.getShowPersons2().forEach((k,v)->System.out.println("1 name: "+v.getName()+" id: "+v.getID()));
 				System.out.println("From client: " + input);
 
 				switch (input) {
@@ -56,7 +56,7 @@ public class ServerAction implements Runnable{
 
 				case "insert":
 					Person msgResPerson = (Person) inStream.readObject();
-					save.insertPerson(msgResPerson,doc.getShowPersons2());
+					save.insertPerson(msgResPerson, doc.getShowPersons2());
 					outStream.writeObject(new Objects("Element added!"));
 					break;
 
@@ -66,21 +66,19 @@ public class ServerAction implements Runnable{
 					msgRes = (Objects) inStream.readObject();
 					rem = new Remove(doc.getShowPersons2());
 					check = new IDoperations(doc.getShowPersons2());
-					System.out.println("msg: "+msgRes.message);
-					if (!check.testIfCorUser(Long.valueOf(msgRes.message),getUserID())) {
-						t="1";
-						b="";
+					if (!check.testIfCorUser(Long.valueOf(msgRes.message), getUserID())) {
+						t = "1";
+						b = "";
 					}
-					if(!check.testIfIDExist(Long.valueOf(msgRes.message))) {
-						t="2";
-						b="";
+					if (!check.testIfIDExist(Long.valueOf(msgRes.message))) {
+						t = "2";
+						b = "";
 					}
-					if(t==null) {
-						t="3";
-						b=rem.removeID(Long.valueOf(msgRes.message));
+					if (t == null) {
+						t = "3";
+						b = rem.removeID(Long.valueOf(msgRes.message));
 					}
 					save.savePerson(doc.getShowPersons2());
-					//doc.getShowPersons2().forEach((k,v)->System.out.println("2 name: "+v.getName()+" id: "+v.getID()));
 					outStream.writeObject(new Objects(t));
 					outStream.writeObject(new Objects(b));
 					break;
@@ -97,7 +95,7 @@ public class ServerAction implements Runnable{
 						}
 						outStream.writeObject(new Objects(send));
 					} while (!check.testIfKeyExist(Long.valueOf(msgRes.message)));
-					rem.remove_greater(Long.valueOf(msgRes.message),getUserID());
+					rem.remove_greater(Long.valueOf(msgRes.message), getUserID());
 					outStream.writeObject(
 							new Objects("Elements key>= " + Long.valueOf(msgRes.message) + " where deleted"));
 					save.savePerson(doc.getShowPersons2());
@@ -121,7 +119,7 @@ public class ServerAction implements Runnable{
 						msgRes = (Objects) inStream.readObject();
 						checkIDNew = Long.valueOf(msgRes.message);
 						if (check.testIfIDExist(checkID) && !check.testIfIDExist(checkIDNew)
-								&&check.testIfCorUser(checkID, getUserID())) {
+								&& check.testIfCorUser(checkID, getUserID())) {
 							send = "2";
 						} else {
 							send = "1";
@@ -136,52 +134,51 @@ public class ServerAction implements Runnable{
 					rem = new Remove(doc.getShowPersons2());
 					msgRes = (Objects) inStream.readObject();
 					System.out.println(msgRes.message);
-					outStream.writeObject(new Objects(rem.remove_all_by_birthday(msgRes.message,getUserID())));
+					outStream.writeObject(new Objects(rem.remove_all_by_birthday(msgRes.message, getUserID())));
 					save.savePerson(doc.getShowPersons2());
 					break;
-					
+
 				case "user":
 					msgRes = (Objects) inStream.readObject();
-					thislogin=msgRes.message;
+					thislogin = msgRes.message;
 					System.out.println(msgRes.message);
-					if(!md2.testLogin(msgRes.message)) {
+					if (!md2.testLogin(msgRes.message)) {
 						System.out.println("Login does not exist");
 						outStream.writeObject(new Objects("1"));
-					}else {
+					} else {
 						outStream.writeObject(new Objects("2"));
-						msgRes = (Objects) inStream.readObject();	
+						msgRes = (Objects) inStream.readObject();
 						System.out.println(msgRes.message);
-						int user = md2.testPassword(msgRes.message,thislogin);
-						if(user==-1) {
+						int user = md2.testPassword(msgRes.message, thislogin);
+						if (user == -1) {
 							outStream.writeObject(new Objects("-1"));
-							userID=user;
-						}else {
-							System.out.println("User "+thislogin+" is connected! user id: "+user);
+							userID = user;
+						} else {
+							System.out.println("User " + thislogin + " is connected! user id: " + user);
 							outStream.writeObject(new Objects(String.valueOf(user)));
-							userID=user;
+							userID = user;
 						}
 					}
 					break;
-					
+
 				case "newuser":
 					String login;
 					String password;
 					msgRes = (Objects) inStream.readObject();
-					login=msgRes.message;
+					login = msgRes.message;
 					msgRes = (Objects) inStream.readObject();
-					password=md2.encryptThisString(msgRes.message);			
-					UserInfo newuser = new UserInfo(doc.userinfo.size()+1,login,password);
+					password = md2.encryptThisString(msgRes.message);
+					UserInfo newuser = new UserInfo(doc.userinfo.size() + 1, login, password);
 					doc.userinfo.put(doc.userinfo.size(), newuser);
-					doc.userinfo.forEach((k,v)->System.out.println("k: "+k+"; userID: "+v.getUser_id()+
-							"; login: "+v.getLogin()+"; password: "+v.getPassword()));
+					doc.userinfo.forEach((k, v) -> System.out.println("k: " + k + "; userID: " + v.getUser_id()
+							+ "; login: " + v.getLogin() + "; password: " + v.getPassword()));
 					save.saveUser(doc.getUserinfo());
 					break;
-					
+
 				}
 
 			} while (!msgRes.message.equals("exit"));
-			System.out.println("Client "+getLogin()+" is disconnected");
-			
+			System.out.println("Client " + getLogin() + " is disconnected");
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,11 +186,11 @@ public class ServerAction implements Runnable{
 			e.printStackTrace();
 		}
 	}
-	
+
 	public int getUserID() {
 		return this.userID;
 	}
-	
+
 	public String getLogin() {
 		return this.thislogin;
 	}

@@ -20,12 +20,11 @@ public class DataBaseOp {
 	final String url = "jdbc:postgresql://localhost:5432/lab7_db";
 	LinkedHashMap<Integer, UserInfo> userinfo = new LinkedHashMap<Integer, UserInfo>();
 	LinkedHashMap<Integer, Person> showPersons2 = new LinkedHashMap<Integer, Person>();
-	
+
 	public DataBaseOp() {
 		fillUser();
 		fillPers();
 	}
-	
 
 	public void fillUser() {
 		Integer i = 0;
@@ -46,7 +45,7 @@ public class DataBaseOp {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	public void fillPers() {
 		Integer i = 0;
 		showPersons2.clear();
@@ -63,12 +62,12 @@ public class DataBaseOp {
 				Double height = rs.getDouble("height");
 				String passportid = rs.getString("passportid");
 				Integer xloc = rs.getInt("xloc");
-				Long yloc = rs.getLong("yloc");	
+				Long yloc = rs.getLong("yloc");
 				Long zloc = rs.getLong("zloc");
 				Coordinates cord = new Coordinates(xcor, ycor);
 				Location loc = new Location(xloc, yloc, zloc);
-				Person pers = new Person(id, name, cord, height, passportid,
-						Color.valueOf(rs.getString("color")), loc, userId);
+				Person pers = new Person(id, name, cord, height, passportid, Color.valueOf(rs.getString("color")), loc,
+						userId);
 				pers.setCreationDate(ZonedDateTime.parse(rs.getString("creationdata")));
 				pers.FsetDateTimeBirthString(LocalDate.parse(rs.getString("birthsday")));
 				showPersons2.put(i, pers);
@@ -78,16 +77,15 @@ public class DataBaseOp {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		//showPersons2.forEach((k,v) -> System.out.println(v.getUserID()));
+
 	}
-	
+
 	public LinkedHashMap<Integer, Person> getShowPersons2() {
 		return this.showPersons2;
 	}
-	
+
 	public LinkedHashMap<Integer, UserInfo> getUserinfo() {
 		return this.userinfo;
 	}
-	
 
 }
