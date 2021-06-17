@@ -19,7 +19,7 @@ public class ServerAction implements Runnable{
 	private DataBaseOp doc = new DataBaseOp();
 	private IDoperations check = new IDoperations(doc.getShowPersons2());
 	private Remove rem = new Remove(doc.getShowPersons2());
-	private Save save = new Save(doc.showPersons2,doc.userinfo);
+	private Save save = new Save();
 	private MD2 md2 = new MD2(doc.getUserinfo());
 	private Socket socket;
 	private ObjectOutputStream outStream = null;
@@ -43,6 +43,8 @@ public class ServerAction implements Runnable{
 			do {
 				msgRes = (Objects) inStream.readObject();
 				this.input = msgRes.message;
+				doc = new DataBaseOp();
+				//doc.getShowPersons2().forEach((k,v)->System.out.println("1 name: "+v.getName()+" id: "+v.getID()));
 				System.out.println("From client: " + input);
 
 				switch (input) {
@@ -53,25 +55,18 @@ public class ServerAction implements Runnable{
 					break;
 
 				case "insert":
-					Insert in = new Insert(doc.getShowPersons2());
-					IDoperations getID = new IDoperations(doc.getShowPersons2());
-					String s = String.valueOf(getID.setID());
-					outStream.writeObject(new Objects(s));
 					Person msgResPerson = (Person) inStream.readObject();
-					Coordinates newCoordinates = new Coordinates((msgResPerson.getXcoordinate()),
-							(msgResPerson.getYcoordinate()));
-					Location newLocation = new Location((msgResPerson.getXlocation()), (msgResPerson.getYlocation()),
-							(msgResPerson.getZlocation()));
-					in.insert(msgResPerson.getName(), newCoordinates, msgResPerson.getHeight(), msgResPerson.getID(),
-							msgResPerson.getPassportID(), msgResPerson.getEyeColor(), newLocation,
-							msgResPerson.FgetBirthday(),msgResPerson.getUserID());
-					outStream.writeObject(new Objects(msgResPerson.getName() + " is added to the list!"));
+					save.insertPerson(msgResPerson,doc.getShowPersons2());
+					outStream.writeObject(new Objects("Element added!"));
 					break;
 
 				case "remove":
 					String t = null;
 					String b = null;
 					msgRes = (Objects) inStream.readObject();
+					rem = new Remove(doc.getShowPersons2());
+					check = new IDoperations(doc.getShowPersons2());
+					System.out.println("msg: "+msgRes.message);
 					if (!check.testIfCorUser(Long.valueOf(msgRes.message),getUserID())) {
 						t="1";
 						b="";
@@ -84,14 +79,17 @@ public class ServerAction implements Runnable{
 						t="3";
 						b=rem.removeID(Long.valueOf(msgRes.message));
 					}
-					
+					save.savePerson(doc.getShowPersons2());
+					//doc.getShowPersons2().forEach((k,v)->System.out.println("2 name: "+v.getName()+" id: "+v.getID()));
 					outStream.writeObject(new Objects(t));
 					outStream.writeObject(new Objects(b));
 					break;
 
 				case "remove_greater":
 					do {
+						rem = new Remove(doc.getShowPersons2());
 						msgRes = (Objects) inStream.readObject();
+						check = new IDoperations(doc.getShowPersons2());
 						if (!check.testIfKeyExist(Long.valueOf(msgRes.message))) {
 							send = "1";
 						} else {
@@ -102,17 +100,21 @@ public class ServerAction implements Runnable{
 					rem.remove_greater(Long.valueOf(msgRes.message),getUserID());
 					outStream.writeObject(
 							new Objects("Elements key>= " + Long.valueOf(msgRes.message) + " where deleted"));
+					save.savePerson(doc.getShowPersons2());
 					break;
 
 				case "clear":
 					rem = new Remove(doc.getShowPersons2());
 					outStream.reset();
 					outStream.writeObject(new Objects(rem.clear(getUserID())));
+					save.savePerson(doc.getShowPersons2());
 					break;
 
 				case "replace_if_greater":
 					Long checkID = 0L;
 					Long checkIDNew = 0L;
+					rem = new Remove(doc.getShowPersons2());
+					check = new IDoperations(doc.getShowPersons2());
 					do {
 						msgRes = (Objects) inStream.readObject();
 						checkID = Long.valueOf(msgRes.message);
@@ -127,12 +129,15 @@ public class ServerAction implements Runnable{
 						outStream.writeObject(new Objects(send));
 					} while (send.equals("1"));
 					outStream.writeObject(new Objects(rem.removeID(checkID)));
+					save.savePerson(doc.getShowPersons2());
 					break;
 
 				case "remove_all_by_birthday":
+					rem = new Remove(doc.getShowPersons2());
 					msgRes = (Objects) inStream.readObject();
 					System.out.println(msgRes.message);
 					outStream.writeObject(new Objects(rem.remove_all_by_birthday(msgRes.message,getUserID())));
+					save.savePerson(doc.getShowPersons2());
 					break;
 					
 				case "user":
@@ -169,13 +174,9 @@ public class ServerAction implements Runnable{
 					doc.userinfo.put(doc.userinfo.size(), newuser);
 					doc.userinfo.forEach((k,v)->System.out.println("k: "+k+"; userID: "+v.getUser_id()+
 							"; login: "+v.getLogin()+"; password: "+v.getPassword()));
-					save.saveUser();
+					save.saveUser(doc.getUserinfo());
 					break;
 					
-				case "save":
-					save.savePerson();
-					outStream.writeObject(new Objects("Changes are saved!"));
-					break;
 				}
 
 			} while (!msgRes.message.equals("exit"));

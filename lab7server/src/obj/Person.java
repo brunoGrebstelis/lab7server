@@ -76,6 +76,10 @@ public class Person implements  Serializable {
 	        return id;
 	    }
 	    
+	    public void setID(long setID) {
+	        this.id=setID;
+	    }
+	    
 	    public int getUserID() {
 	        return userId;
 	    }

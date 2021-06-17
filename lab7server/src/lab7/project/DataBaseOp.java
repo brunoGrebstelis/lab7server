@@ -49,6 +49,7 @@ public class DataBaseOp {
 	
 	public void fillPers() {
 		Integer i = 0;
+		showPersons2.clear();
 		try {
 			final Connection connection = DriverManager.getConnection(url, user, password);
 			Statement st = connection.createStatement();

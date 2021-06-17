@@ -29,10 +29,12 @@ public class Remove {
 	}
 
 	public String clear(int userID) {
+		System.out.println("useIDincweocn: "+userID);
 		ArrayList<Integer> keyToRem = new ArrayList<Integer>();
 		for (Entry<Integer, Person> m : showPersons2.entrySet()) {
 			Person a = m.getValue();
 			if (userID==a.getUserID()) {
+				System.out.println("here: "+a.getName()+" id: "+a.getID());
 				keyToRem.add(m.getKey());
 			}
 		}
